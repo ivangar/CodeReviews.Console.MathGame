@@ -27,23 +27,19 @@ namespace MathGame.ivangar
                 Console.WriteLine($"\t{(int)option}. {option}");
         }
 
-        public static char StartGamePrompt(int maxNumberOfQuestions, int currentQuestionNumber)
+        public static void StartGamePrompt(int maxNumberOfQuestions)
         {
-            Console.WriteLine($"\nThis game has {maxNumberOfQuestions} questions.\n\n\tQuestion #{currentQuestionNumber}\n");
-            return PrintGameOptions();
+            Console.WriteLine($"\nThis game has {maxNumberOfQuestions} questions.");
         }
 
-        public static char PrintGameOptions(bool invalid = false, int currentQuestionNumber = -1)
+        /* TO DELETE */
+        public static void PrintGameOptions(bool invalid = false, int currentQuestionNumber = -1)
         {
             if (invalid)
                 Console.Write("\nInvalid operation selected! ");
 
             if (currentQuestionNumber > 0)
                 Console.WriteLine($"\n\tQuestion #{currentQuestionNumber}\n");
-
-            Console.Write("Choose an operation and type any of the following options: +, -, *, / ");
-            ConsoleKeyInfo keyInfo = Console.ReadKey();
-            return keyInfo.KeyChar;
         }
     }
 }

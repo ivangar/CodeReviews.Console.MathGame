@@ -4,35 +4,39 @@
     {
         private readonly char[] _operators = ['+', '-', '*', '/'];
 
-        //private int _maxNumberOfQuestions = Random.Shared.Next(5, 11);
-        private int _maxNumberOfQuestions = 2;
+        private int _maxNumberOfQuestions = Random.Shared.Next(5, 11);
+        //private int _maxNumberOfQuestions = 4; //USE this to test, remove before PR
 
         private int _currentQuestionNumber = 1;
 
         private int _score = 0;
+
+        private int _result;
+
+        public int _userAnswer;
+
+        private int _op1, _op2;
 
         public List<string> GameHistory = [];
 
         public void Start()
         {
             bool continueGame = true;
-            char operation = Menu.StartGamePrompt(_maxNumberOfQuestions, _currentQuestionNumber);
+            Menu.StartGamePrompt(_maxNumberOfQuestions);
+            var operation = GetNextOperation();
 
             while (continueGame)
             {
-                while (!Array.Exists(_operators, o => o == operation))
+                switch (operation)
                 {
-                    operation = Menu.PrintGameOptions(true);
+                    case '+': Add(); break;
+                    case '-': Subtract(); break;
+                    case '*': Multiply(); break;
+                    case '/': Divide(); break;
                 }
 
-                var (result, answer) = operation switch
-                {
-                    '+' => Add(),
-                    '-' => Subtract(),
-                    _ => throw new InvalidOperationException("Invalid operation selected.")
-                };
-
-                ValidateAnswer(result, answer);
+                var validAnswer = ValidateAnswer();
+                UpdateGameHistory(operation, validAnswer);
                 _currentQuestionNumber++;
 
                 if (_currentQuestionNumber > _maxNumberOfQuestions)
@@ -44,7 +48,7 @@
                 continueGame = ValidateContinueGame(continueInput);
 
                 if (continueGame)
-                    operation = Menu.PrintGameOptions(false, _currentQuestionNumber);
+                    operation = GetNextOperation();
             }
 
             Console.WriteLine("\nGame Over!\n");
@@ -52,61 +56,69 @@
             PrintGameHistory();
         }
 
-        public (int result, int answer) Add()
+        public void Add()
         {
-            var a = Random.Shared.Next(0, 101);
-            var b = Random.Shared.Next(0, 101);
-            var result = a + b;
+            _op1 = Random.Shared.Next(0, 101);
+            _op2 = Random.Shared.Next(0, 101);
+            _result = _op1 + _op2;
 
-            Console.Write($"\n\nWhat is the result of:\n{a} + {b} = ");
+            Console.Write($"\n\nWhat is the result of:\n{_op1} + {_op2} = ");
             string? answer = Console.ReadLine();
-            int parsedAnswer;
 
-            while (!int.TryParse(answer, out parsedAnswer))
+            while (!int.TryParse(answer, out _userAnswer))
             {
                 Console.WriteLine("Invalid input. Please enter a valid number: ");
                 answer = Console.ReadLine();
             }
-
-            GameHistory.Add($"{a} + {b} = {parsedAnswer}");
-
-            return (result, parsedAnswer);
         }
 
-        public (int result, int answer) Subtract()
+        public void Subtract()
         {
-            var a = Random.Shared.Next(0, 101);
-            var b = Random.Shared.Next(0, 101);
-            var result = a - b;
+            _op1 = Random.Shared.Next(0, 101);
+            _op2 = Random.Shared.Next(0, 101);
+            _result = _op1 - _op2;
 
-            Console.Write($"\n\nWhat is the result of:\n{a} - {b} = ");
+            Console.Write($"\n\nWhat is the result of:\n{_op1} - {_op2} = ");
             string? answer = Console.ReadLine();
-            int parsedAnswer;
 
-            while (!int.TryParse(answer, out parsedAnswer))
+            while (!int.TryParse(answer, out _userAnswer))
             {
                 Console.WriteLine("Invalid input. Please enter a valid number: ");
                 answer = Console.ReadLine();
             }
-
-            GameHistory.Add($"{a} - {b} = {parsedAnswer}");
-
-            return (result, parsedAnswer);
         }
 
-        public void ValidateAnswer(int result, int answer)
+        public void Multiply()
         {
-            if (result == answer)
+            _op1 = Random.Shared.Next(0, 101);
+            _op2 = Random.Shared.Next(0, 101);
+            _result = _op1 * _op2;
+
+            Console.Write($"\n\nWhat is the result of:\n{_op1} * {_op2} = ");
+            string? answer = Console.ReadLine();
+
+            while (!int.TryParse(answer, out _userAnswer))
             {
-                Console.WriteLine("Correct Answer!");
-                _score++;
-            }
-            else
-            {
-                Console.WriteLine($"Incorrect Answer! The correct answer is: {result}");
+                Console.WriteLine("Invalid input. Please enter a valid number: ");
+                answer = Console.ReadLine();
             }
         }
 
+        public void Divide()
+        {
+            _op1 = Random.Shared.Next(1, 101);
+            _op2 = GetDivisor();
+            _result = _op1 / _op2;
+
+            Console.Write($"\n\nWhat is the result of:\n{_op1} / {_op2} = ");
+            string? answer = Console.ReadLine();
+
+            while (!int.TryParse(answer, out _userAnswer))
+            {
+                Console.WriteLine("Invalid input. Please enter a valid number: ");
+                answer = Console.ReadLine();
+            }
+        }
         public void PrintGameHistory()
         {
             Console.WriteLine("\nGame History:\n");
@@ -114,9 +126,39 @@
             {
                 Console.WriteLine($"{index + 1}. {operation}");
             }
+
+            Console.WriteLine("\n\n");
         }
 
-        public bool ValidateContinueGame(string? input)
+        public void PrintScore()
+        {
+            decimal finalScore = Math.Round((decimal)_score * 100 / _maxNumberOfQuestions, MidpointRounding.AwayFromZero);
+            Console.WriteLine($"Your score is: {finalScore}%");
+        }
+
+        private bool ValidateAnswer()
+        {
+            if (_result == _userAnswer)
+            {
+                Console.WriteLine("Correct Answer!");
+                _score++;
+                return true;
+            }
+
+            else
+                Console.WriteLine($"Incorrect Answer! The correct answer is: {_result}");
+
+            return false;
+        }
+
+        private void UpdateGameHistory(char operation, bool validAnswer)
+        {
+            var scoreMark = validAnswer ? "Correct" : "Incorrect";
+            var operationLog = $"{_op1} {operation} {_op2} = {_userAnswer,-30} {scoreMark,-20}";
+            GameHistory.Add(operationLog);
+        }
+
+        private bool ValidateContinueGame(string? input)
         {
             while (string.IsNullOrWhiteSpace(input) ||
                 (!string.Equals(input.Trim(), "yes", StringComparison.OrdinalIgnoreCase) &&
@@ -129,10 +171,34 @@
             return string.Equals(input.Trim(), "yes", StringComparison.OrdinalIgnoreCase);
         }
 
-        public void PrintScore()
+        private char GetNextOperation()
         {
-            decimal finalScore = Math.Round((decimal)_score * 100 / _maxNumberOfQuestions, MidpointRounding.AwayFromZero);
-            Console.WriteLine($"Your score is: {finalScore}%");
+            Console.WriteLine($"\n\n\tQuestion #{_currentQuestionNumber}\n");
+            return _operators[Random.Shared.Next(0, _operators.Length)];
         }
+
+        /*Get a list of potential divisors (without remainders) and return randomly any divisor */
+        private int GetDivisor()
+        {
+            if (IsPrimeNumber(_op1))
+                return 1;
+
+            var divisors = Enumerable
+                .Range(1, _op1)
+                .Where(x => _op1 % x == 0)
+                .ToList();
+
+            return divisors[Random.Shared.Next(0, divisors.Count)];
+        }
+
+        private bool IsPrimeNumber(int number)
+        {
+            var primes = Enumerable.Range(2, 100)
+                       .Where(n => !Enumerable.Range(2, (int)Math.Sqrt(n) - 1).Any(d => n % d == 0))
+                       .ToList();
+
+            return primes.Contains(number);
+        }
+
     }
 }

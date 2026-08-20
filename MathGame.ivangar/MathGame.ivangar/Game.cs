@@ -19,14 +19,18 @@
 
         public List<string> GameHistory = [];
 
-        public void Start()
+        public void Play()
         {
             bool continueGame = true;
-            Menu.StartGamePrompt(_maxNumberOfQuestions);
-            var operation = GetNextOperation();
+            char operation = Menu.StartGamePrompt(_maxNumberOfQuestions, _currentQuestionNumber);
 
             while (continueGame)
             {
+                while (!Array.Exists(_operators, o => o == operation))
+                {
+                    operation = Menu.PrintGameOptions(invalid: true);
+                }
+
                 switch (operation)
                 {
                     case '+': Add(); break;
@@ -42,16 +46,15 @@
                 if (_currentQuestionNumber > _maxNumberOfQuestions)
                     break;
 
-                Console.WriteLine("\nWould you like to continue the game? (yes/no)");
-                string? continueInput = Console.ReadLine();
-
+                char continueInput = Menu.ContinueGamePrompt();
                 continueGame = ValidateContinueGame(continueInput);
 
                 if (continueGame)
-                    operation = GetNextOperation();
+                    operation = Menu.PrintGameOptions(false, _currentQuestionNumber);
+
             }
 
-            Console.WriteLine("\nGame Over!\n");
+            Console.WriteLine("\n\nGame Over!\n");
             PrintScore();
             PrintGameHistory();
         }
@@ -136,6 +139,13 @@
             Console.WriteLine($"Your score is: {finalScore}%");
         }
 
+        public void FinishGame()
+        {
+            Console.WriteLine("\n\nGame Over!\n");
+            PrintGameHistory();
+            PrintScore();
+        }
+
         private bool ValidateAnswer()
         {
             if (_result == _userAnswer)
@@ -158,23 +168,14 @@
             GameHistory.Add(operationLog);
         }
 
-        private bool ValidateContinueGame(string? input)
+        private static bool ValidateContinueGame(char input)
         {
-            while (string.IsNullOrWhiteSpace(input) ||
-                (!string.Equals(input.Trim(), "yes", StringComparison.OrdinalIgnoreCase) &&
-                 !string.Equals(input.Trim(), "no", StringComparison.OrdinalIgnoreCase)))
+            while (input != 'y' && input != 'n')
             {
-                Console.WriteLine("Invalid input. Please enter 'yes' or 'no': ");
-                input = Console.ReadLine();
+                input = Menu.ContinueGamePrompt(invalid: true);
             }
 
-            return string.Equals(input.Trim(), "yes", StringComparison.OrdinalIgnoreCase);
-        }
-
-        private char GetNextOperation()
-        {
-            Console.WriteLine($"\n\n\tQuestion #{_currentQuestionNumber}\n");
-            return _operators[Random.Shared.Next(0, _operators.Length)];
+            return input == 'y';
         }
 
         /*Get a list of potential divisors (without remainders) and return randomly any divisor */

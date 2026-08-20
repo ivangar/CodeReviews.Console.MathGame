@@ -1,5 +1,5 @@
 ﻿using MathGame.ivangar.Enums;
-using MathGame.ivangar.Helpers;
+using MathGame.ivangar.Validators;
 
 namespace MathGame.ivangar
 {

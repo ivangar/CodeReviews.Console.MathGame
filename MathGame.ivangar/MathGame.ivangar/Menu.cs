@@ -43,7 +43,7 @@ namespace MathGame.ivangar
             if (currentQuestionNumber > 0)
                 Console.WriteLine($"\n\n\tQuestion #{currentQuestionNumber}\n");
 
-            Console.Write("Choose an operation and type any of the following options: +, -, *, / \n");
+            Console.Write("Choose an operation (type any of the following options: +, -, *, /): ");
             ConsoleKeyInfo keyInfo = Console.ReadKey();
             return keyInfo.KeyChar;
         }

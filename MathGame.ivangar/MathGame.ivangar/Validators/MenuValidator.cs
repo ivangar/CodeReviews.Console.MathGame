@@ -1,8 +1,6 @@
-﻿
+﻿using MathGame.ivangar.Enums;
 
-using MathGame.ivangar.Enums;
-
-namespace MathGame.ivangar.Helpers
+namespace MathGame.ivangar.Validators
 {
     public static class MenuValidator
     {

@@ -7,6 +7,7 @@ namespace MathGame.ivangar
         private static readonly char[] _operators = ['+', '-', '*', '/'];
 
         private readonly int _maxNumberOfQuestions;
+        private readonly Random _random;
 
         // State fields
         private int _currentQuestionNumber;
@@ -20,7 +21,8 @@ namespace MathGame.ivangar
 
         public Game()
         {
-            _maxNumberOfQuestions = Random.Shared.Next(5, 11);
+            _random = new Random();
+            _maxNumberOfQuestions = _random.Next(5, 11);
             _currentQuestionNumber = 1;
             _score = 0;
         }
@@ -57,10 +59,8 @@ namespace MathGame.ivangar
 
         public void PerformMathOperation(char operation)
         {
-            Random random = new();
-
-            _op1 = operation == '/' ? random.Next(1, 101) : random.Next(0, 101);
-            _op2 = operation == '/' ? GetDivisor() : random.Next(0, 101);
+            _op1 = operation == '/' ? _random.Next(1, 101) : _random.Next(0, 101);
+            _op2 = operation == '/' ? GetDivisor() : _random.Next(0, 101);
             CalculateResult(operation);
 
             Console.Write($"\n\nWhat is the result of:\n{_op1} {operation} {_op2} = ");
@@ -138,7 +138,7 @@ namespace MathGame.ivangar
                 .Where(x => _op1 % x == 0)
                 .ToList();
 
-            return divisors[Random.Shared.Next(0, divisors.Count)];
+            return divisors[_random.Next(0, divisors.Count)];
         }
 
         private static bool IsPrimeNumber(int number)

@@ -1,4 +1,4 @@
 ﻿using MathGame.ivangar;
 
-var mathGame = new GameCenter();
-mathGame.Start();
+var gameCenter = new GameCenter();
+gameCenter.Start();

@@ -16,8 +16,6 @@ namespace MathGame.ivangar
 
         public int UserAnswer { get; set; }
 
-        public IReadOnlyList<MathOperation> GameHistory => _gameHistory;
-
         private readonly List<MathOperation> _gameHistory = new();
 
         public Game()
@@ -92,7 +90,7 @@ namespace MathGame.ivangar
         {
             Console.WriteLine("\nGame History:\n");
 
-            foreach (var (index, operation) in GameHistory.Select((o, i) => (i, o)))
+            foreach (var (index, operation) in _gameHistory.Select((o, i) => (i, o)))
             {
                 Console.WriteLine($"{index + 1}. {operation}");
             }

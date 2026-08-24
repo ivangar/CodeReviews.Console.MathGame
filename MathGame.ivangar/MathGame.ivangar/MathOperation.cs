@@ -10,7 +10,8 @@
 
         public override string ToString()
         {
-            return $"{OperandA} {Operation} {OperandB} = {UserAnswer,-10} {ScoreMark,-5}";
+            var leftHandSide = $"{OperandA} {Operation} {OperandB} = {UserAnswer}";
+            return $"{leftHandSide,-20} {ScoreMark,-5}";
         }
     }
 }

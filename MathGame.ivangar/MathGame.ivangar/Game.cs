@@ -2,7 +2,7 @@
 
 namespace MathGame.ivangar
 {
-    public class Game
+    public class Game : IGame
     {
         private static readonly char[] _operators = ['+', '-', '*', '/'];
 
@@ -16,9 +16,9 @@ namespace MathGame.ivangar
 
         public int UserAnswer { get; set; }
 
-        public IReadOnlyList<string> GameHistory => _gameHistory;
+        public IReadOnlyList<MathOperation> GameHistory => _gameHistory;
 
-        private readonly List<string> _gameHistory = new();
+        private readonly List<MathOperation> _gameHistory = new();
 
         public Game()
         {
@@ -41,9 +41,8 @@ namespace MathGame.ivangar
                 }
 
                 PerformMathOperation(operation);
+                validator.ValidateAnswer(_result, UserAnswer, ref _score);
 
-                var validAnswer = validator.ValidateAnswer(_result, UserAnswer, ref _score);
-                UpdateGameHistory(operation, validAnswer);
                 _currentQuestionNumber++;
 
                 if (_currentQuestionNumber > _maxNumberOfQuestions)
@@ -61,22 +60,15 @@ namespace MathGame.ivangar
         public void PerformMathOperation(char operation)
         {
             Random random = new();
+
             _op1 = operation == '/' ? random.Next(1, 101) : random.Next(0, 101);
             _op2 = operation == '/' ? GetDivisor() : random.Next(0, 101);
-
-            _result = operation switch
-            {
-                '+' => _op1 + _op2,
-                '-' => _op1 - _op2,
-                '*' => _op1 * _op2,
-                '/' => _op1 / _op2,
-                _ => throw new InvalidOperationException("Invalid operation")
-            };
+            CalculateResult(operation);
 
             Console.Write($"\n\nWhat is the result of:\n{_op1} {operation} {_op2} = ");
             string? answer = Console.ReadLine();
 
-            int parsedAnswer; // local variable
+            int parsedAnswer;
             while (!int.TryParse(answer, out parsedAnswer))
             {
                 Console.WriteLine("Invalid input. Please enter a valid number: ");
@@ -84,11 +76,22 @@ namespace MathGame.ivangar
             }
 
             UserAnswer = parsedAnswer;
+
+            _gameHistory.Add(new MathOperation
+            {
+                OperandA = _op1,
+                OperandB = _op2,
+                Operation = operation,
+                UserAnswer = UserAnswer,
+                ScoreMark = UserAnswer == _result ? "Correct" : "Incorrect"
+            }
+            );
         }
 
         public void PrintGameHistory()
         {
             Console.WriteLine("\nGame History:\n");
+
             foreach (var (index, operation) in GameHistory.Select((o, i) => (i, o)))
             {
                 Console.WriteLine($"{index + 1}. {operation}");
@@ -114,11 +117,16 @@ namespace MathGame.ivangar
         }
 
         #region Private Methods
-        private void UpdateGameHistory(char operation, bool validAnswer)
+        private void CalculateResult(char operation)
         {
-            var scoreMark = validAnswer ? "Correct" : "Incorrect";
-            var operationLog = $"{_op1} {operation} {_op2} = {UserAnswer,-30} {scoreMark,-20}";
-            _gameHistory.Add(operationLog);
+            _result = operation switch
+            {
+                '+' => _op1 + _op2,
+                '-' => _op1 - _op2,
+                '*' => _op1 * _op2,
+                '/' => _op1 / _op2,
+                _ => throw new InvalidOperationException("Invalid operation")
+            };
         }
 
         /*Get a list of potential divisors (without remainders) and return randomly any divisor */
